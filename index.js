@@ -5,7 +5,8 @@ const crypto = require('crypto');
 // Is the file being executed in master mode?
 if(cluster.isMaster){
     // Cause index.js to be executed again but in child mode
-    cluster.fork(); // One worker
+    cluster.fork(); // First worker
+    cluster.fork(); // Second worker
 } else {
     // I am a child, I'm going to act like a normal express server and do nothing else
     const express = require('express');
