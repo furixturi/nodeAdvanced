@@ -1,11 +1,24 @@
 const crypto = require('crypto');
 const express = require('express');
 const app = express();
+const Worker = require("webworker-threads").Worker;
 
 app.get('/', (req, res) => {
-    crypto.pbkdf2("a", "b", 100000, 512, "sha512", () => {
-        res.send("Hi there");
+    const worker = new Worker(function(){
+        this.onmessage = function(){
+            let counter = 0;
+            while (counter < 1e9) {
+                counter++;
+            }
+            postMessage(counter); //trickers the worker.onmessage outside
+        }
     });
+
+    worker.onmessage = function(message){
+        res.send(message.data + '');
+    };
+
+    worker.postMessage(); // triggers the this.onmessage in worker
 });
 
 app.get('/fast', (req, res) => {
@@ -13,3 +26,5 @@ app.get('/fast', (req, res) => {
 })
 app.listen(3000);
 
+// Use apache benchmark:
+// ab -c 4 -n 8 localhost:3000/
